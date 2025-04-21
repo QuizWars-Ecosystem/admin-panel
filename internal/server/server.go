@@ -39,13 +39,6 @@ func NewServer(_ context.Context, cfg *config.Config) (*Server, error) {
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
 
-	/*	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"*"},
-		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
-		AllowMethods:     []string{echo.GET, echo.POST, echo.OPTIONS},
-		AllowCredentials: true,
-	}))*/
-
 	h := apis.NewHandler(logger.Zap())
 
 	e.StaticFS("/assets", assets.Assets)

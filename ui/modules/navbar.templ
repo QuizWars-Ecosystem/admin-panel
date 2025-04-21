@@ -1,9 +1,20 @@
 package modules
 
+import (
+    "github.com/QuizWars-Ecosystem/admin-panel/ui/components"
+    "github.com/QuizWars-Ecosystem/admin-panel/ui/components/buttons"
+)
+
 templ Navbar() {
-	<nav class="border-b py-3">
-		<div class="container mx-auto px-2 flex justify-end">
-			@ThemeSwitcher()
+	<nav class="border-b py-2">
+		<div class="flex justify-between items-center px-5 mx-auto px-2">
+		    <div class="flex justify-start gap-4">
+                @components.NavbarTitle()
+		    </div>
+		    <div class="flex justify-end gap-4">
+		        @ThemeSwitcher()
+		        @buttons.NavbarLogoutButton("http://localhost:8090")
+		    </div>
 		</div>
 	</nav>
 }
