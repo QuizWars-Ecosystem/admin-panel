@@ -5,6 +5,31 @@ import (
 	"github.com/axzilla/templui/helper"
 )
 
+templ BaseLayout() {
+	<!DOCTYPE html>
+	<html lang="en" class="h-full light">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>QuizWars Admin Panel</title>
+			<!-- Tailwind CSS (output) -->
+			<link href="/assets/css/output.css" rel="stylesheet"/>
+			<!-- Alpine.js -->
+			<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+			<!-- Component scripts -->
+			@helper.ComponentScripts()
+			<!-- Theme switcher script -->
+			@ThemeSwitcherScript()
+		</head>
+		<body
+			x-data="themeHandler"
+		>
+			@modules.Navbar()
+			{ children... }
+		</body>
+	</html>
+}
+
 templ ThemeSwitcherScript() {
 	{{ handle := templ.NewOnceHandle() }}
 	@handle.Once() {
@@ -27,28 +52,4 @@ templ ThemeSwitcherScript() {
 			})
 		</script>
 	}
-}
-
-templ BaseLayout() {
-	<!DOCTYPE html>
-	<html lang="en" class="h-full light">
-		<head>
-			<meta charset="UTF-8"/>
-			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			<!-- Tailwind CSS (output) -->
-			<link href="/assets/css/output.css" rel="stylesheet"/>
-			<!-- Alpine.js -->
-			<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-			<!-- Component scripts -->
-			@helper.ComponentScripts()
-			<!-- Theme switcher script -->
-			@ThemeSwitcherScript()
-		</head>
-		<body
-			x-data="themeHandler"
-		>
-			@modules.Navbar()
-			{ children... }
-		</body>
-	</html>
 }

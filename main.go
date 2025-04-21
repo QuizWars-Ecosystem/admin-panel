@@ -1,49 +1,51 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
+	"context"
+	serverCfg "github.com/QuizWars-Ecosystem/admin-panel/internal/config"
+	"github.com/QuizWars-Ecosystem/admin-panel/internal/server"
+	"github.com/QuizWars-Ecosystem/go-common/pkg/abstractions"
+	"github.com/QuizWars-Ecosystem/go-common/pkg/config"
+	"log/slog"
 	"os"
-
-	"github.com/QuizWars-Ecosystem/admin-panel/assets"
-	"github.com/QuizWars-Ecosystem/admin-panel/ui/pages"
-	"github.com/a-h/templ"
-	"github.com/joho/godotenv"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
-	InitDotEnv()
-	mux := http.NewServeMux()
-	SetupAssetsRoutes(mux)
-	mux.Handle("GET /", templ.Handler(pages.Landing()))
-	fmt.Println("Server is running on http://localhost:8090")
-	http.ListenAndServe(":8090", mux)
-}
-
-func InitDotEnv() {
-	err := godotenv.Load()
+	cfg, err := config.Load[serverCfg.Config]()
 	if err != nil {
-		fmt.Println("Error loading .env file")
+		slog.Error("Error loading config", "error", err)
+		return
 	}
-}
 
-func SetupAssetsRoutes(mux *http.ServeMux) {
-	var isDevelopment = os.Getenv("GO_ENV") != "production"
+	startCtx, startCancel := context.WithTimeout(context.Background(), cfg.StartTimeout)
+	defer startCancel()
 
-	assetHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if isDevelopment {
-			w.Header().Set("Cache-Control", "no-store")
+	var srv abstractions.Server
+
+	srv, err = server.NewServer(startCtx, cfg)
+	if err != nil {
+		slog.Error("Error starting server", "error", err)
+		return
+	}
+
+	go func() {
+		signalCh := make(chan os.Signal, 1)
+		signal.Notify(signalCh, os.Interrupt, syscall.SIGTERM)
+
+		<-signalCh
+		slog.Info("Shutting down server...")
+
+		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), cfg.StopTimeout)
+		defer shutdownCancel()
+
+		if err = srv.Shutdown(shutdownCtx); err != nil {
+			slog.Warn("Server forced to shutdown", "error", err)
 		}
+	}()
 
-		var fs http.Handler
-		if isDevelopment {
-			fs = http.FileServer(http.Dir("./assets"))
-		} else {
-			fs = http.FileServer(http.FS(assets.Assets))
-		}
-
-		fs.ServeHTTP(w, r)
-	})
-
-	mux.Handle("GET /assets/", http.StripPrefix("/assets/", assetHandler))
+	if err = srv.Start(); err != nil {
+		slog.Error("Server failed to start", "error", err)
+	}
 }
