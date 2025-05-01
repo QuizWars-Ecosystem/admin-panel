@@ -10,12 +10,12 @@ import (
 func NewAuthMiddleware(service *jwt.Service) func(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			session, err := sessions.Store.Get(c.Request(), "admin-session")
+			session, err := sessions.Store.Get(c.Request(), sessions.AdminSessionName)
 			if err != nil {
 				return c.Redirect(http.StatusSeeOther, "/login")
 			}
 
-			token, ok := session.Values["auth_token"].(string)
+			token, ok := session.Values[sessions.TokenSessionName].(string)
 			if !ok || token == "" || !isValidJWT(service, token) {
 				return c.Redirect(http.StatusSeeOther, "/login")
 			}

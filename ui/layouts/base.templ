@@ -5,7 +5,7 @@ import (
 	"github.com/axzilla/templui/helper"
 )
 
-templ BaseLayout() {
+templ BaseLayout(isAuth bool, childrens ...templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en" class="h-full light">
 		<head>
@@ -24,8 +24,10 @@ templ BaseLayout() {
 		<body
 			x-data="themeHandler"
 		>
-			@modules.Navbar()
-			{ children... }
+			@modules.Navbar(isAuth)
+			for _, c := range childrens {
+			    @c
+			}
 		</body>
 	</html>
 }

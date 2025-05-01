@@ -5,7 +5,7 @@ import (
     "github.com/QuizWars-Ecosystem/admin-panel/ui/components/buttons"
 )
 
-templ Navbar() {
+templ Navbar(isAuth bool) {
 	<nav class="border-b py-2">
 		<div class="flex justify-between items-center px-5 mx-auto px-2">
 		    <div class="flex justify-start gap-4">
@@ -13,7 +13,11 @@ templ Navbar() {
 		    </div>
 		    <div class="flex justify-end gap-4">
 		        @ThemeSwitcher()
-		        @buttons.NavbarLoginButton("http://localhost:8090")
+		        if isAuth {
+		            @buttons.NavbarLogoutButton("/logout")
+		        } else {
+		            @buttons.NavbarLoginButton("/login")
+		        }
 		    </div>
 		</div>
 	</nav>

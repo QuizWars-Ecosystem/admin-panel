@@ -33,7 +33,7 @@ func NewServer(_ context.Context, cfg *config.Config) (*Server, error) {
 	logger := log.NewLogger(cfg.Local, cfg.LogLevel)
 	cl.PushIO(logger)
 
-	sessions.NewStore()
+	store := sessions.NewStore()
 
 	authService := jwt.NewService(&jwt.Config{
 		Secret:            cfg.JWT.Secret,
@@ -51,11 +51,11 @@ func NewServer(_ context.Context, cfg *config.Config) (*Server, error) {
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
 
-	h := apis.NewHandler(logger.Zap())
+	h := apis.NewHandler(store, logger.Zap())
 
 	e.StaticFS("/assets", assets.Assets)
 
-	e.GET("/login", nil)
+	e.GET("/login", h.LoginPage)
 	e.POST("/login", nil)
 
 	authGroup := e.Group("")
