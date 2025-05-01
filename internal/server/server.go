@@ -7,6 +7,7 @@ import (
 	"github.com/DavidMovas/gopherbox/pkg/closer"
 	"github.com/QuizWars-Ecosystem/admin-panel/assets"
 	"github.com/QuizWars-Ecosystem/admin-panel/internal/apis"
+	"github.com/QuizWars-Ecosystem/admin-panel/internal/clients"
 	"github.com/QuizWars-Ecosystem/admin-panel/internal/config"
 	"github.com/QuizWars-Ecosystem/admin-panel/internal/sessions"
 	"github.com/QuizWars-Ecosystem/go-common/pkg/abstractions"
@@ -15,6 +16,8 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"net/http"
 )
 
@@ -43,6 +46,16 @@ func NewServer(_ context.Context, cfg *config.Config) (*Server, error) {
 
 	_ = authService
 
+	pool := clients.NewGRPCClients(
+		cfg.ServerURL,
+		logger.Zap(),
+		[]grpc.DialOption{
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+		}...,
+	)
+
+	cl.PushNE(pool.Close)
+
 	e := echo.New()
 	e.HideBanner = true
 	e.HidePort = true
@@ -51,7 +64,8 @@ func NewServer(_ context.Context, cfg *config.Config) (*Server, error) {
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
 
-	h := apis.NewHandler(store, logger.Zap())
+	s := apis.NewService(pool, logger.Zap())
+	h := apis.NewHandler(s, store, logger.Zap())
 
 	e.StaticFS("/assets", assets.Assets)
 

@@ -11,16 +11,18 @@ import (
 )
 
 type Handler struct {
-	r      *render.Render
-	store  *gorilla.CookieStore
-	logger *zap.Logger
+	r       *render.Render
+	store   *gorilla.CookieStore
+	service *Service
+	logger  *zap.Logger
 }
 
-func NewHandler(store *gorilla.CookieStore, logger *zap.Logger) *Handler {
+func NewHandler(service *Service, store *gorilla.CookieStore, logger *zap.Logger) *Handler {
 	return &Handler{
-		r:      &render.Render{},
-		store:  store,
-		logger: logger,
+		r:       &render.Render{},
+		service: service,
+		store:   store,
+		logger:  logger,
 	}
 }
 

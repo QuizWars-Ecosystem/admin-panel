@@ -13,3 +13,6 @@ tailwind-watch:
 dev:
 	@echo "Starting..."
 	@make -j3 tailwind-watch templ run-air
+
+buf-gen:
+	cd ./protobuf && make buf-gen-server

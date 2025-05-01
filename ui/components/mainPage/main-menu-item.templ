@@ -1,0 +1,14 @@
+package mainpage
+
+import "github.com/axzilla/templui/component/button"
+
+templ MainMenuItem(text string, url string) {
+	<div>
+		@button.Button(button.Props{
+			Variant: button.VariantLink,
+			Href: url,
+		}) {
+			{ text }
+		}
+	</div>
+}
