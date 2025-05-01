@@ -4,12 +4,12 @@ import (
 	"github.com/axzilla/templui/component/button"
 )
 
-templ NavbarLogoutButton(redirectURL string) {
+templ NavbarLoginButton(redirectURL string) {
 	@button.Button(button.Props{
-    	Variant: button.VariantOutline,
+    	Variant: "default",
     	Href:    redirectURL,
     	Target:  "_blank",
     }) {
-    	Logout
+    	Login
     }
 }

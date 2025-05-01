@@ -8,7 +8,9 @@ import (
 	"github.com/QuizWars-Ecosystem/admin-panel/assets"
 	"github.com/QuizWars-Ecosystem/admin-panel/internal/apis"
 	"github.com/QuizWars-Ecosystem/admin-panel/internal/config"
+	"github.com/QuizWars-Ecosystem/admin-panel/internal/sessions"
 	"github.com/QuizWars-Ecosystem/go-common/pkg/abstractions"
+	"github.com/QuizWars-Ecosystem/go-common/pkg/jwt"
 	"github.com/QuizWars-Ecosystem/go-common/pkg/log"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -31,6 +33,16 @@ func NewServer(_ context.Context, cfg *config.Config) (*Server, error) {
 	logger := log.NewLogger(cfg.Local, cfg.LogLevel)
 	cl.PushIO(logger)
 
+	sessions.NewStore()
+
+	authService := jwt.NewService(&jwt.Config{
+		Secret:            cfg.JWT.Secret,
+		AccessExpiration:  cfg.JWT.AccessTimeout,
+		RefreshExpiration: cfg.JWT.RefreshTimeout,
+	})
+
+	_ = authService
+
 	e := echo.New()
 	e.HideBanner = true
 	e.HidePort = true
@@ -43,7 +55,12 @@ func NewServer(_ context.Context, cfg *config.Config) (*Server, error) {
 
 	e.StaticFS("/assets", assets.Assets)
 
-	e.GET("/", h.MainPage)
+	e.GET("/login", nil)
+	e.POST("/login", nil)
+
+	authGroup := e.Group("")
+	//authGroup.Use(middlewares.NewAuthMiddleware(authService))
+	authGroup.GET("/", h.MainPage)
 
 	return &Server{
 		e:      e,
