@@ -70,7 +70,7 @@ func NewServer(_ context.Context, cfg *config.Config) (*Server, error) {
 	e.StaticFS("/assets", assets.Assets)
 
 	e.GET("/login", h.LoginPage)
-	e.POST("/login", nil)
+	e.POST("/login", h.LoginSubmitForm)
 
 	authGroup := e.Group("")
 	//authGroup.Use(middlewares.NewAuthMiddleware(authService))

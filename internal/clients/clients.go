@@ -11,6 +11,7 @@ import (
 
 type UsersClient struct {
 	usersv1.UsersAdminServiceClient
+	usersv1.UsersAuthServiceClient
 }
 
 type GRPCClients struct {
@@ -60,6 +61,7 @@ func (c *GRPCClients) connect() error {
 	c.conn = conn
 
 	c.UsersClient.UsersAdminServiceClient = usersv1.NewUsersAdminServiceClient(conn)
+	c.UsersClient.UsersAuthServiceClient = usersv1.NewUsersAuthServiceClient(conn)
 
 	c.logger.Info("Connected to server", zap.String("address", c.address))
 
